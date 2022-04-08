@@ -1,0 +1,150 @@
+version: '3.9'
+services:
+  x42server:
+    image: x42server:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.x42server.rule=Host(`x42server.xserver.network`)"
+      - "traefik.http.middlewares.x42server.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
+      - "traefik.http.middlewares.x42server.headers.customresponseheaders.Access-Control-Allow-Origin=*"
+      - "traefik.http.middlewares.x42server.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
+      - "traefik.http.routers.x42server.middlewares=x42server"
+      - "traefik.http.routers.x42server.entrypoints=websecure"
+      - "traefik.http.routers.x42server.tls.certresolver=myresolver"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+
+    command: --chain=x42
+    #entrypoint: ["sh", "-c", "sleep 2073600"]
+    restart: always
+    depends_on:
+      - "x42postgres"
+      - "traefik"
+#    ports:
+#      - "0.0.0.0:4242:4242" #xServerPort
+    volumes:
+      - type: bind
+        source: ./config/xserver
+        target: /root/.xserverdata/main/
+        read_only: true
+      - type: bind
+        source: ./config/xcore
+        target: /root/.blockcore/x42
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - x42network
+    expose:
+      - 4242
+
+  x42core:
+    image: x42core:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.x42core.rule=Host(`x42core.xserver.network`)"
+      - "traefik.http.middlewares.x42core.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
+      - "traefik.http.middlewares.x42core.headers.customresponseheaders.Access-Control-Allow-Origin=*"
+      - "traefik.http.middlewares.x42core.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
+      - "traefik.http.routers.x42core.middlewares=x42core"
+      - "traefik.http.routers.x42core.entrypoints=websecure"
+      - "traefik.http.routers.x42core.tls.certresolver=myresolver"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+
+    command: --chain=x42 -txindex=1 -addressindex=1
+    restart: always
+    depends_on:
+      - "traefik"
+    ports:
+#      - "0.0.0.0:42220:42220" #API
+      - "0.0.0.0:52342:52342" #Blockcore Port
+      - "0.0.0.0:52343:52343" #RPC Port
+      - "0.0.0.0:42222:42222" #wsPort
+    volumes:
+      - type: bind
+        source: ./config/xcore
+        target: /root/.blockcore/x42
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - x42network
+    expose:
+      - 42220
+    
+  x42postgres:
+      image: postgres:14.2-alpine3.15
+      restart: always
+      environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=password
+        - POSTGRES_DB=x42
+      logging:
+        options:
+          max-size: 10m
+          max-file: "3"
+      ports:
+        - '5432:5432'
+      volumes: 
+        - /var/x42/postgres-data:/var/lib/postgresql/data
+      networks:
+        - x42network
+        
+  x42serverui:
+    image: x42serverui:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.x42serverui.rule=Host(`x42serverui.xserver.network`)"
+      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
+      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Origin=*"
+      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
+      - "traefik.http.routers.x42serverui.middlewares=x42serverui"
+      - "traefik.http.routers.x42serverui.entrypoints=websecure"
+      - "traefik.http.routers.x42serverui.tls.certresolver=myresolver"
+
+#    environment:
+    restart: always
+    depends_on:
+      - "x42core"
+      - "x42server"
+      - "traefik"
+#    ports:
+#      - "0.0.0.0:80:80" #xServerPort
+    volumes:
+      - type: bind
+        source: ./config/xserverui/app.config.json
+        target: /usr/share/nginx/html/assets/app.config.json
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - x42network
+    expose:
+      - 80
+  traefik:
+    image: "traefik:v2.6"
+    container_name: "traefik"
+    #command:
+      #- "--log.level=DEBUG"
+      #- "--api.insecure=true"
+      #- "--providers.docker=true"
+      #- "--providers.docker.exposedbydefault=false"
+      #- "--entrypoints.websecure.address=:443"
+      #- "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      #- "--certificatesresolvers.myresolver.acme.email=psavva@gmail.com"
+      #- "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - 80:80
+      - 443:443
+#    ports:
+#      - "80:80" #xServerUI
+#      - "4242:4242" #xServer
+#      - "42220:42220" #xCore
+#      - "8080:8080" #Traefik
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+      - "./certs/:/certs/"
+      - "./config/traefik/traefik.yaml:/etc/traefik/traefik.yaml"
+    networks:
+      - x42network
+networks:
+  x42network:
+    external: false
+    name: x42network
