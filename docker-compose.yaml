@@ -4,13 +4,24 @@ services:
     image: x42server:latest
     labels:
       - "traefik.enable=true"
+      
       - "traefik.http.routers.x42server.rule=Host(`x42server.xserver.network`)"
+      - "traefik.http.routers.x42server.middlewares=x42server"  
+      - "traefik.http.routers.x42server.entrypoints=websecure"
+      - "traefik.http.routers.x42server.tls.certresolver=myresolver"
+      - "traefik.http.routers.x42server.tls.options=default@file" 
+      
+      - "traefik.http.routers.x42server-public.rule=Host(`x42serverpub.xserver.network`) &&(PathPrefix(`/ping`)||PathPrefix(`/gettop`)||PathPrefix(`/registerserver`)||PathPrefix(`/getactivecount`)||PathPrefix(`/getactivexservers`)||PathPrefix(`/searchforxserver`)||PathPrefix(`/getprofile`)||PathPrefix(`/reserveprofile`)||PathPrefix(`/receiveprofilereservation`)||PathPrefix(`/getnextprofiles`)||PathPrefix(`/getprice`)||PathPrefix(`/getprices`)||PathPrefix(`/createpricelock`)||PathPrefix(`/updatepricelock`)||PathPrefix(`/getavailablepairs`)||PathPrefix(`/getpricelock`)||PathPrefix(`/submitpayment`))"
+      - "traefik.http.routers.x42server-public.middlewares=x42server"  
+      - "traefik.http.routers.x42server-public.entrypoints=websecure"
+      - "traefik.http.routers.x42server-public.tls.certresolver=myresolver"
+      - "traefik.http.routers.x42server-public.tls.options=public@file"
+      
       - "traefik.http.middlewares.x42server.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
       - "traefik.http.middlewares.x42server.headers.customresponseheaders.Access-Control-Allow-Origin=*"
       - "traefik.http.middlewares.x42server.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
-      - "traefik.http.routers.x42server.middlewares=x42server"
-      - "traefik.http.routers.x42server.entrypoints=websecure"
-      - "traefik.http.routers.x42server.tls.certresolver=myresolver"
+
+
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+
