@@ -57,6 +57,9 @@ tls:
         caFiles:
           - /certs/ca_org_cert.pem
         clientAuthType: RequireAndVerifyClientCert
+    public:
+      clientAuth:
+        clientAuthType: NoClientCert
           
 # when testing certs, enable this so traefik doesn't use 
 # it's own self signed. By default if it can't find a matching
