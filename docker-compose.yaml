@@ -5,13 +5,13 @@ services:
     labels:
       - "traefik.enable=true"
       
-      - "traefik.http.routers.x42server.rule=Host(`x42server.xserver.network`)"
+      - "traefik.http.routers.x42server.rule=Host(`${XSERVER_BACKEND}`)"
       - "traefik.http.routers.x42server.middlewares=x42server"  
       - "traefik.http.routers.x42server.entrypoints=websecure"
       - "traefik.http.routers.x42server.tls.certresolver=myresolver"
       - "traefik.http.routers.x42server.tls.options=default@file" 
       
-      - "traefik.http.routers.x42server-public.rule=Host(`x42serverpub.xserver.network`) &&(PathPrefix(`/ping`)||PathPrefix(`/gettop`)||PathPrefix(`/registerserver`)||PathPrefix(`/getactivecount`)||PathPrefix(`/getactivexservers`)||PathPrefix(`/searchforxserver`)||PathPrefix(`/getprofile`)||PathPrefix(`/reserveprofile`)||PathPrefix(`/receiveprofilereservation`)||PathPrefix(`/getnextprofiles`)||PathPrefix(`/getprice`)||PathPrefix(`/getprices`)||PathPrefix(`/createpricelock`)||PathPrefix(`/updatepricelock`)||PathPrefix(`/getavailablepairs`)||PathPrefix(`/getpricelock`)||PathPrefix(`/submitpayment`))"
+      - "traefik.http.routers.x42server-public.rule=Host(`${XSERVERPUBLIC_BACKEND}`) &&(PathPrefix(`/ping`)||PathPrefix(`/gettop`)||PathPrefix(`/registerserver`)||PathPrefix(`/getactivecount`)||PathPrefix(`/getactivexservers`)||PathPrefix(`/searchforxserver`)||PathPrefix(`/getprofile`)||PathPrefix(`/reserveprofile`)||PathPrefix(`/receiveprofilereservation`)||PathPrefix(`/getnextprofiles`)||PathPrefix(`/getprice`)||PathPrefix(`/getprices`)||PathPrefix(`/createpricelock`)||PathPrefix(`/updatepricelock`)||PathPrefix(`/getavailablepairs`)||PathPrefix(`/getpricelock`)||PathPrefix(`/submitpayment`))"
       - "traefik.http.routers.x42server-public.middlewares=x42server"  
       - "traefik.http.routers.x42server-public.entrypoints=websecure"
       - "traefik.http.routers.x42server-public.tls.certresolver=myresolver"
@@ -21,18 +21,14 @@ services:
       - "traefik.http.middlewares.x42server.headers.customresponseheaders.Access-Control-Allow-Origin=*"
       - "traefik.http.middlewares.x42server.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
 
-
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+
     command: --chain=x42
-    #entrypoint: ["sh", "-c", "sleep 2073600"]
     restart: always
     depends_on:
       - "x42postgres"
       - "traefik"
-#    ports:
-#      - "0.0.0.0:4242:4242" #xServerPort
     volumes:
       - type: bind
         source: ./config/xserver
@@ -51,7 +47,7 @@ services:
     image: x42core:latest
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.x42core.rule=Host(`x42core.xserver.network`)"
+      - "traefik.http.routers.x42core.rule=Host(`${XCORE_BACKEND}`)"
       - "traefik.http.middlewares.x42core.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
       - "traefik.http.middlewares.x42core.headers.customresponseheaders.Access-Control-Allow-Origin=*"
       - "traefik.http.middlewares.x42core.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
@@ -66,7 +62,6 @@ services:
     depends_on:
       - "traefik"
     ports:
-#      - "0.0.0.0:42220:42220" #API
       - "0.0.0.0:52342:52342" #Blockcore Port
       - "0.0.0.0:52343:52343" #RPC Port
       - "0.0.0.0:42222:42222" #wsPort
@@ -84,9 +79,9 @@ services:
       image: postgres:14.2-alpine3.15
       restart: always
       environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=password
-        - POSTGRES_DB=x42
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        - POSTGRES_DB=${POSTGRES_DB}
       logging:
         options:
           max-size: 10m
@@ -102,22 +97,18 @@ services:
     image: x42serverui:latest
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.x42serverui.rule=Host(`x42serverui.xserver.network`)"
+      - "traefik.http.routers.x42serverui.rule=Host(`${XSERVER_FRONTEND}`)"
       - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
       - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Origin=*"
       - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
       - "traefik.http.routers.x42serverui.middlewares=x42serverui"
       - "traefik.http.routers.x42serverui.entrypoints=websecure"
       - "traefik.http.routers.x42serverui.tls.certresolver=myresolver"
-
-#    environment:
     restart: always
     depends_on:
       - "x42core"
       - "x42server"
       - "traefik"
-#    ports:
-#      - "0.0.0.0:80:80" #xServerPort
     volumes:
       - type: bind
         source: ./config/xserverui/app.config.json
@@ -130,24 +121,9 @@ services:
   traefik:
     image: "traefik:v2.6"
     container_name: "traefik"
-    #command:
-      #- "--log.level=DEBUG"
-      #- "--api.insecure=true"
-      #- "--providers.docker=true"
-      #- "--providers.docker.exposedbydefault=false"
-      #- "--entrypoints.websecure.address=:443"
-      #- "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      #- "--certificatesresolvers.myresolver.acme.email=psavva@gmail.com"
-      #- "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - 80:80
       - 443:443
-#    ports:
-#      - "80:80" #xServerUI
-#      - "4242:4242" #xServer
-#      - "42220:42220" #xCore
-#      - "8080:8080" #Traefik
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./letsencrypt:/letsencrypt"

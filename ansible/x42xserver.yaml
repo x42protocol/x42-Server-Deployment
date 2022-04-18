@@ -1,0 +1,24 @@
+---
+- name: Create Directories
+  hosts: all
+  become: true
+  tasks:
+    - name: create directory structure
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0775
+      loop:
+        - /opt/x42protocol
+        - /opt/x42protocol/config
+        - /opt/x42protocol/config/traefik
+        - /opt/x42protocol/config/xcore
+        - /opt/x42protocol/config/xserver
+        - /opt/x42protocol/config/xserverui
+        
+    - name: Ansible copy file to remote server
+      copy:
+        src: ../config/traefik/traefik.yaml
+        dest: /opt/x42protocol/config/traefik
