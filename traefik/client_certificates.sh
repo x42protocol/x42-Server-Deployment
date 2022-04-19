@@ -34,7 +34,7 @@ mkdir -p pki/${NAME}
 openssl req -newkey rsa:4096 -keyout pki/${NAME}/${NAME}_key.pem -out pki/${NAME}/${NAME}_csr.pem -nodes -days 365 -subj "/CN=${NAME}"
 # we add the extensions manually, some bug in openssl prevents them from being copied from the request
 create_extension_file
-openssl x509 -req -in pki/${NAME}/${NAME}_csr.pem -CA pki/${NAME}/ca_org_cert.pem -CAkey pki/${NAME}/ca_org_key.pem -out pki/${NAME}/${NAME}_cert.pem -set_serial 01 -days 365 -extensions v3_req -extfile pki/extension.cnf
+openssl x509 -req -in pki/${NAME}/${NAME}_csr.pem -CA pki/ca_org_cert.pem -CAkey pki/ca_org_key.pem -out pki/${NAME}/${NAME}_cert.pem -set_serial 01 -days 365 -extensions v3_req -extfile pki/extension.cnf
 
 openssl verify -CAfile=pki/ca_org_cert.pem pki/${NAME}/${NAME}_cert.pem
 
