@@ -9,3 +9,5 @@ docker-build.sh
 
 Todo: Official images will be made available on every release
 
+Alaternative, load the x42serverui.tar from this location with:
+docker load -i x42serverui.tar
