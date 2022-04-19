@@ -59,8 +59,6 @@ services:
       - ASPNETCORE_URLS=http://+
     command: --chain=x42 -txindex=1 -addressindex=1
     restart: always
-    depends_on:
-      - "traefik"
     ports:
       - "0.0.0.0:52342:52342" #Blockcore Port
       - "0.0.0.0:52343:52343" #RPC Port
@@ -109,7 +107,6 @@ services:
     depends_on:
       - "x42core"
       - "x42server"
-      - "traefik"
     volumes:
       - type: bind
         source: ./xserverui/app.config.json
