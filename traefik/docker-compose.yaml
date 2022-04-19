@@ -14,9 +14,6 @@ services:
     networks:
       - proxy
 networks:
-  x42network:
-    external: true
-    name: x42network
   proxy:
     external: false
     name: proxy
