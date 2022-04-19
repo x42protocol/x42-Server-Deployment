@@ -10,7 +10,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./letsencrypt:/letsencrypt"
       - "./certs/:/certs/"
-      - "./config/traefik/traefik.yaml:/etc/traefik/traefik.yaml"
+      - "./traefik.yaml:/etc/traefik/traefik.yaml"
     networks:
       - proxy
 networks:
