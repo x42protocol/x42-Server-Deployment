@@ -28,18 +28,18 @@ services:
     restart: always
     depends_on:
       - "x42postgres"
-      - "traefik"
     volumes:
       - type: bind
-        source: ./config/xserver
+        source: ./xserver
         target: /root/.xserverdata/main/
         read_only: true
       - type: bind
-        source: ./config/xcore
+        source: ./xcore
         target: /root/.blockcore/x42
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - x42network
+      - proxy
     expose:
       - 4242
 
@@ -67,11 +67,12 @@ services:
       - "0.0.0.0:42222:42222" #wsPort
     volumes:
       - type: bind
-        source: ./config/xcore
+        source: ./xcore
         target: /root/.blockcore/x42
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - x42network
+      - proxy
     expose:
       - 42220
     
@@ -92,7 +93,7 @@ services:
         - /var/x42/postgres-data:/var/lib/postgresql/data
       networks:
         - x42network
-        
+     
   x42serverui:
     image: x42serverui:latest
     labels:
@@ -111,27 +112,18 @@ services:
       - "traefik"
     volumes:
       - type: bind
-        source: ./config/xserverui/app.config.json
+        source: ./xserverui/app.config.json
         target: /usr/share/nginx/html/assets/app.config.json
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - x42network
+      - proxy
     expose:
       - 80
-  traefik:
-    image: "traefik:v2.6"
-    container_name: "traefik"
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"
-      - "./certs/:/certs/"
-      - "./config/traefik/traefik.yaml:/etc/traefik/traefik.yaml"
-    networks:
-      - x42network
 networks:
   x42network:
     external: false
     name: x42network
+  proxy:
+    external: true
+    name: proxy

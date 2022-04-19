@@ -1,0 +1,4 @@
+{
+    "fullNodeEndpoint": "https://x42core.yourdomain.com/api",
+    "xServerEndpoint": "https://x42server.yourdomain.com"
+}
