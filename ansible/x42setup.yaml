@@ -5,5 +5,5 @@
   tasks:
     - name: fix file permissions
       ansible.builtin.file:
-        path: "traefik/letsencrypt/acme.json"
+        path: "../traefik/letsencrypt/acme.json"
         mode: '0600'
