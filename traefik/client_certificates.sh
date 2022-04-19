@@ -30,7 +30,7 @@ ENDOFTEXT
 }
 # create a certificate based on the CA
 
-mkdir pki/${NAME}
+mkdir -p pki/${NAME}
 openssl req -newkey rsa:4096 -keyout pki/${NAME}/${NAME}_key.pem -out pki/${NAME}/${NAME}_csr.pem -nodes -days 365 -subj "/CN=${NAME}"
 # we add the extensions manually, some bug in openssl prevents them from being copied from the request
 create_extension_file
