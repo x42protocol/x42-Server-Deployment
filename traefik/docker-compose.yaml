@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  traefik:
+    image: "traefik:v2.6"
+    container_name: "traefik"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+      - "./certs/:/certs/"
+      - "./traefik.yaml:/etc/traefik/traefik.yaml"
+    networks:
+      - proxy
+networks:
+  proxy:
+    external: false
+    name: proxy

@@ -1,0 +1,9 @@
+---
+- name: install Docker
+  hosts: localhost
+  become: true
+  tasks:
+    - name: fix file permissions
+      ansible.builtin.file:
+        path: "../traefik/letsencrypt/acme.json"
+        mode: '0600'
