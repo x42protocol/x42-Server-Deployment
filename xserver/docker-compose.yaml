@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   x42server:
-    image: x42server:latest
+    image: x42protocoldocker/x42server:latest
     labels:
       - "traefik.enable=true"
       
@@ -44,7 +44,7 @@ services:
       - 4242
 
   x42core:
-    image: x42core:latest
+    image: x42protocoldocker/x42core:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.x42core.rule=Host(`${XCORE_BACKEND}`)"
@@ -93,7 +93,7 @@ services:
         - x42network
      
   x42serverui:
-    image: x42serverui:latest
+    image: x42protocoldocker/x42serverui:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.x42serverui.rule=Host(`${XSERVER_FRONTEND}`)"
