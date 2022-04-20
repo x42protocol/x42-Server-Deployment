@@ -1,7 +1,7 @@
 #!/bin/sh
 
 apt update -y
-apt install software-properties-common -y
+apt install software-properties-common git-all -y
 add-apt-repository --yes --update ppa:ansible/ansible
 apt install ansible -y
 
