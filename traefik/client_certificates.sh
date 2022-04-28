@@ -2,17 +2,14 @@
 # @author Ovidiu Ionescu
 # This script generates client certificates for browser authentication
 
-if [ $# -lt 2 ]; then
-  echo "Usage: $0 name email"
+if [ $# -lt 3 ]; then
+  echo "Usage: $0 name password email"
   exit 1
 fi
 
 NAME=$1
-EMAIL=$2
-
-# Generate self signed certificate. Run these lines manually when you need the generate the CA certificate
-#openssl req -newkey rsa:4096 -keyout ca_org_key.pem -out ca_org_csr.pem -nodes -days 3650 -subj "/O=Organizator/CN=Organizator Root CA X3"
-#openssl x509 -req -in ca_org_csr.pem -signkey ca_org_key.pem -out ca_org_cert.pem -days 3650
+PASSWORD=$2
+EMAIL=$3
 
 create_extension_file() {
 cat << ENDOFTEXT > pki/extension.cnf
@@ -39,4 +36,4 @@ openssl x509 -req -in pki/${NAME}/${NAME}_csr.pem -CA pki/ca_org_cert.pem -CAkey
 openssl verify -CAfile=pki/ca_org_cert.pem pki/${NAME}/${NAME}_cert.pem
 
 # package the certificate and the password
-openssl pkcs12 -export -clcerts -in pki/${NAME}/${NAME}_cert.pem -inkey pki/${NAME}/${NAME}_key.pem -out pki/${NAME}/${NAME}.p12
+openssl pkcs12 -export -clcerts -in pki/${NAME}/${NAME}_cert.pem -inkey pki/${NAME}/${NAME}_key.pem -out pki/${NAME}/${NAME}.p12  -passout pass:${PASSWORD}

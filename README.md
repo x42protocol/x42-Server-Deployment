@@ -6,7 +6,7 @@ Preparing the Server for installation of xServer
 
 `cd x42-Server-Deployment`
 
-`sh setup.sh`
+`sudo sh setup.sh`
 
 
 **Installing Traefik Reverse Proxy**
@@ -15,7 +15,7 @@ Preparing the Server for installation of xServer
 
 `sh create_ca.sh`
 
-`sh client_certificates.sh <Your Name> <your@email.com>` eg: sh client_certificates.sh satoshi satoshi@nakamoto.com
+`sh client_certificates.sh <Your Name> <your@email.com>` eg: sh client_certificates.sh satoshi mysupersecretpassword satoshi@nakamoto.com
 
 `docker-compose up -d`
 
@@ -85,8 +85,11 @@ Mandatory configuration changes required:
 5) Configure `xserver/xserverui/app.config.json`
 
    `{
+   
        "fullNodeEndpoint": "https://x42core.yourdomain.com/api", #subdomain and domain must match XCORE_BACKEND in the .evn file
+	   
        "xServerEndpoint": "https://x42server.yourdomain.com" #subdomain and domain must match XSERVER_BACKEND in the .env file
+   
    }`
 
 6) **Startup xServer**

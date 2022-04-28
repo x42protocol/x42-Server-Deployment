@@ -37,6 +37,19 @@
         - docker-ce-cli
         - containerd.io
     
+    # sudo groupadd docker
+    - name: Create "docker" group
+      group:
+        name: "docker"
+        state: present
+
+    # sudo usermod -aG docker root
+    - name: Add {{ ansible_user_id }} user to "docker" group
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: "docker"
+        append: yes
+
     - name: start and enable docker daemon
       service:
         name: docker
