@@ -44,7 +44,7 @@
         state: present
 
     # sudo usermod -aG docker root
-    - name: Add remote "ubuntu" user to "docker" group
+    - name: Add {{ ansible_user_id }} user to "docker" group
       user:
         name: "{{ ansible_user_id }}"
         groups: "docker"
