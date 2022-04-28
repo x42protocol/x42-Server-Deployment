@@ -52,12 +52,15 @@ certificatesResolvers:
 
 tls:
   options:
-    default:
+    private:
       clientAuth:    
         caFiles:
           - /certs/ca_org_cert.pem
         clientAuthType: RequireAndVerifyClientCert
     public:
+      clientAuth:
+        clientAuthType: NoClientCert
+    default:
       clientAuth:
         clientAuthType: NoClientCert
           

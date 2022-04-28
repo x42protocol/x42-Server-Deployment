@@ -9,7 +9,7 @@ services:
       - "traefik.http.routers.x42server.middlewares=x42server"  
       - "traefik.http.routers.x42server.entrypoints=websecure"
       - "traefik.http.routers.x42server.tls.certresolver=myresolver"
-      - "traefik.http.routers.x42server.tls.options=default@file" 
+      - "traefik.http.routers.x42server.tls.options=private@file" 
       
       - "traefik.http.routers.x42server-public.rule=Host(`${XSERVERPUBLIC_BACKEND}`) &&(PathPrefix(`/ping`)||PathPrefix(`/gettop`)||PathPrefix(`/registerserver`)||PathPrefix(`/getactivecount`)||PathPrefix(`/getactivexservers`)||PathPrefix(`/searchforxserver`)||PathPrefix(`/getprofile`)||PathPrefix(`/reserveprofile`)||PathPrefix(`/receiveprofilereservation`)||PathPrefix(`/getnextprofiles`)||PathPrefix(`/getprice`)||PathPrefix(`/getprices`)||PathPrefix(`/createpricelock`)||PathPrefix(`/updatepricelock`)||PathPrefix(`/getavailablepairs`)||PathPrefix(`/getpricelock`)||PathPrefix(`/submitpayment`))"
       - "traefik.http.routers.x42server-public.middlewares=x42server"  
@@ -54,6 +54,7 @@ services:
       - "traefik.http.routers.x42core.middlewares=x42core"
       - "traefik.http.routers.x42core.entrypoints=websecure"
       - "traefik.http.routers.x42core.tls.certresolver=myresolver"
+      - "traefik.http.routers.x42core.tls.options=private@file" 
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+
@@ -103,6 +104,7 @@ services:
       - "traefik.http.routers.x42serverui.middlewares=x42serverui"
       - "traefik.http.routers.x42serverui.entrypoints=websecure"
       - "traefik.http.routers.x42serverui.tls.certresolver=myresolver"
+      - "traefik.http.routers.x42serverui.tls.options=private@file" 
     restart: always
     depends_on:
       - "x42core"
