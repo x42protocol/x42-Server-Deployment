@@ -40,14 +40,14 @@
     # sudo groupadd docker
     - name: Create "docker" group
       group:
-        name: "{{ docker_group }}"
+        name: "docker"
         state: present
 
     # sudo usermod -aG docker root
     - name: Add remote "ubuntu" user to "docker" group
       user:
         name: "{{ remote_user }}"
-        group: "{{ docker_group }}"
+        group: "docker"
         append: yes
 
     - name: start and enable docker daemon
