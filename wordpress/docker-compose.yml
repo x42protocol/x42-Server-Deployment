@@ -1,0 +1,58 @@
+version: '3'
+services:
+  mysql:
+    image: mariadb:10.5.9
+    command: --max_allowed_packet=256M
+    volumes:
+      - "./data/db:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    restart: always
+    networks:
+      proxy:
+        aliases:
+          - proxy
+          
+  litespeed:
+    image: litespeedtech/openlitespeed:1.7.16-lsphp81
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.litespeed.rule=Host(`#DOMAIN#`)"
+      - "traefik.http.routers.litespeed.entrypoints=websecure"
+      - "traefik.http.services.litespeed.loadbalancer.server.port=80"
+      - "traefik.http.routers.litespeed.tls.certresolver=myresolver"
+    volumes:
+        - ./lsws/conf:/usr/local/lsws/conf
+        - ./lsws/admin-conf:/usr/local/lsws/admin/conf
+        - ./bin/container:/usr/local/bin
+        - ./sites:/var/www/vhosts/
+        - ./acme:/root/.acme.sh/
+        - ./logs:/usr/local/lsws/logs/
+    restart: always
+    networks:
+      proxy:
+        aliases:
+          - proxy
+    environment:
+      TZ: America/New_York
+      
+      
+  phpmyadmin:
+    image: bitnami/phpmyadmin:5.0.2-debian-10-r72
+    ports:
+      - 8080:80
+      - 8443:443
+    environment:
+        DATABASE_HOST: mysql
+    restart: always    
+
+
+networks:
+  proxy:
+    external: true
+    name: proxy
