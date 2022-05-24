@@ -26,6 +26,7 @@ services:
       - .env
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.#domain#.rule=Host(`#DOMAIN#`)"
       - "traefik.http.routers.#domain#.entrypoints=websecure"
       - "traefik.http.services.#domain#.loadbalancer.server.port=80"
