@@ -12,20 +12,24 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     restart: always
     networks:
-      proxy:
+      #domain#:
         aliases:
-          - proxy
-          
+          - #domain#
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 5
+
   litespeed:
     image: litespeedtech/openlitespeed:1.7.16-lsphp81
     env_file:
       - .env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.litespeed.rule=Host(`#DOMAIN#`)"
-      - "traefik.http.routers.litespeed.entrypoints=websecure"
-      - "traefik.http.services.litespeed.loadbalancer.server.port=80"
-      - "traefik.http.routers.litespeed.tls.certresolver=myresolver"
+      - "traefik.http.routers.#domain#.rule=Host(`#DOMAIN#`)"
+      - "traefik.http.routers.#domain#.entrypoints=websecure"
+      - "traefik.http.services.#domain#.loadbalancer.server.port=80"
+      - "traefik.http.routers.#domain#.tls.certresolver=myresolver"
     volumes:
         - ./lsws/conf:/usr/local/lsws/conf
         - ./lsws/admin-conf:/usr/local/lsws/admin/conf
@@ -38,21 +42,19 @@ services:
       proxy:
         aliases:
           - proxy
+      #domain#:
+        aliases:
+          - #domain#
+    depends_on:
+            mysql:
+                condition: service_healthy
     environment:
       TZ: America/New_York
       
-      
-  phpmyadmin:
-    image: bitnami/phpmyadmin:5.0.2-debian-10-r72
-    ports:
-      - 8080:80
-      - 8443:443
-    environment:
-        DATABASE_HOST: mysql
-    restart: always    
-
-
 networks:
   proxy:
     external: true
     name: proxy
+  #domain#:
+    external: false
+    name: #domain#

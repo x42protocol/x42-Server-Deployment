@@ -8,15 +8,16 @@ fi
 
 APP_NAME=$1
 DOMAIN=$2
+DOMAIN_LOWER=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]' | sed 's/\./'_'/g')
 EMAIL=$3
 MYSQL_PASSWORD=$4
 MYSQL_ROOT_PASSWORD=$5
 
 main(){
-
+	echo "Setting Up ${DOMAIN_LOWER}"
 	echo Setting up Envrionment
 	mkdir -p sites/${DOMAIN}
-	sed 's/#DOMAIN#/'${DOMAIN}'/' docker-compose.yml > sites/${DOMAIN}/docker-compose.yml
+	sed -e 's/#DOMAIN#/'${DOMAIN}'/g' -e 's/#domain#/'${DOMAIN_LOWER}'/g' docker-compose.yml > sites/${DOMAIN}/docker-compose.yml
 	cp -r bin sites/${DOMAIN}/
 	cd sites/${DOMAIN}
 	mkdir acme
