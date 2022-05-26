@@ -13,6 +13,7 @@ services:
       - "./traefik.yaml:/etc/traefik/traefik.yaml"
     networks:
       - proxy
+    restart: always
 networks:
   proxy:
     external: false
