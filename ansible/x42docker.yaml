@@ -50,6 +50,16 @@
         groups: "docker"
         append: yes
 
+    - name: ensure docker service is stopped
+      service:
+        name: docker
+        state: stopped        
+        
+    - name: Deploy Docker daemon.json
+      copy:
+        src: files/docker_daemon.json
+        dest: /etc/docker/daemon.json
+      
     - name: start and enable docker daemon
       service:
         name: docker
