@@ -4,7 +4,7 @@ services:
     image: x42protocoldocker/x42server:latest
     labels:
       - "traefik.enable=true"
-      
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.x42server.rule=Host(`${XSERVER_BACKEND}`)"
       - "traefik.http.routers.x42server.middlewares=x42server"  
       - "traefik.http.routers.x42server.entrypoints=websecure"
@@ -47,6 +47,7 @@ services:
     image: x42protocoldocker/x42core:latest
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.x42core.rule=Host(`${XCORE_BACKEND}`)"
       - "traefik.http.middlewares.x42core.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
       - "traefik.http.middlewares.x42core.headers.customresponseheaders.Access-Control-Allow-Origin=*"
@@ -97,6 +98,7 @@ services:
     image: x42protocoldocker/x42serverui:latest
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.x42serverui.rule=Host(`${XSERVER_FRONTEND}`)"
       - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
       - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Origin=*"
