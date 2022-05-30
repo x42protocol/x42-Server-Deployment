@@ -1,0 +1,195 @@
+version: '2.4'
+
+services:
+
+  pdns-recursor:
+    image: pschiffe/pdns-recursor:${RECURSOR_TAG:-latest}
+    networks:
+      - pdns
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+
+  mariadb:
+    image: mariadb:10.6
+    networks:
+      pdns:
+        aliases:
+          - db
+          - mysql
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - mariadb:/var/lib/mysql:z
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      timeout: 10s
+      retries: 5
+
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin:5
+#    networks:
+#      - pdns
+#      - proxy
+#    ports:
+#      - '8988:80'
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  pdns-master:
+    image: pschiffe/pdns-mysql:${PDNS_MYSQL_TAG:-latest}
+    hostname: ${DNSMASTERHOST}.${DOMAIN}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.pdns-master.rule=Host(`${DNSAPISSERVER}.${DOMAIN}`)"
+      - "traefik.http.routers.pdns-master.middlewares=pdns-master"
+      - "traefik.http.routers.pdns-master.entrypoints=websecure"
+      - "traefik.http.services.pdns-master.loadbalancer.server.port=8081"
+      - "traefik.http.routers.pdns-master.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.pdns-master.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
+      - "traefik.http.middlewares.pdns-master.headers.customresponseheaders.Access-Control-Allow-Origin=*"
+      - "traefik.http.middlewares.pdns-master.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
+
+    networks:
+      pdns:
+        ipv4_address: 172.6.0.20
+        aliases:
+          - pdns
+      proxy:
+        aliases:
+          - proxy
+    extra_hosts:
+      - '${DNSMASTERHOST}.${DOMAIN}:172.6.0.20'
+      - '${DNSSLAVEHOST}.${DOMAIN}:172.6.0.21'
+    ports:
+      - '53:53/tcp'
+      - '53:53/udp'
+      - '8081:8081'
+#      - 53
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - PDNS_gmysql_password=${MYSQL_ROOT_PASSWORD}
+      - PDNS_master=yes
+      - PDNS_api=yes
+      - PDNS_api_key=${PDNS_API_KEY}
+      - PDNS_webserver=yes
+      - PDNS_webserver_address=0.0.0.0
+      - PDNS_webserver_allow_from=172.6.0.0/16,164.215.30.204/32, 197.245.78.110/32, 172.20.0.0/16
+      - PDNS_version_string=anonymous
+      - PDNS_default_ttl=1500
+      - PDNS_allow_axfr_ips=172.6.0.21
+      - PDNS_only_notify=172.6.0.21
+      - PDNS_default_soa_content=${DNSMASTERHOST}.${DOMAIN}. hostmaster.${DOMAIN}. 2022031303 10800 3600 604800 3600
+    depends_on:
+      - mariadb
+
+  pdns-slave:
+    image: pschiffe/pdns-mysql:${PDNS_MYSQL_TAG:-latest}
+    hostname: ${DNSSLAVEHOST}.${DOMAIN}
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.docker.network=proxy"
+#
+#      - "traefik.http.routers.pdns-slave-https.rule=Host(`${DNSSLAVEHOST}.${DOMAIN}`)"
+#      - "traefik.http.routers.pdns-slave-https.middlewares=pdns-slave-https"
+#      - "traefik.http.routers.pdns-slave-https.entrypoints=websecure"
+#      - "traefik.http.routers.pdns-slave-https.tls.certresolver=myresolver"
+#      
+#      - "traefik.tcp.routers.pdns-slave-dns.rule=HostSNI(`${DNSSLAVEHOST}.${DOMAIN}`)"
+#      - "traefik.tcp.routers.pdns-slave-dns.entrypoints=dns"
+#
+#      - "traefik.http.middlewares.pdns-slave-https.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
+#      - "traefik.http.middlewares.pdns-slave-https.headers.customresponseheaders.Access-Control-Allow-Origin=*"
+#      - "traefik.http.middlewares.pdns-slave-https.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
+
+    networks:
+      pdns:
+        ipv4_address: 172.6.0.21
+      proxy:
+        aliases:
+          - proxy
+    extra_hosts:
+      - '${DNSMASTERHOST}.${DOMAIN}:172.6.0.20'
+      - '${DNSSLAVEHOST}.${DOMAIN}:172.6.0.21'
+    ports:
+      - '8082:8081'
+#    expose: 
+#      - 8081
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - PDNS_gmysql_dbname=powerdnsslave
+      - PDNS_gmysql_password=${MYSQL_ROOT_PASSWORD}
+      - PDNS_slave=yes
+      - PDNS_superslave=yes
+      - PDNS_webserver=yes
+      - PDNS_webserver_address=0.0.0.0
+      - PDNS_webserver_allow_from=172.6.0.0/16
+      - PDNS_version_string=anonymous
+      - PDNS_disable_axfr=yes
+      - PDNS_allow_notify_from=172.6.0.20
+      - SUPERMASTER_IPS=172.6.0.20
+      - PDNS_default_soa_content=${DNSMASTERHOST}.${DOMAIN}. hostmaster.${DOMAIN}. 2022031303 10800 3600 604800 3600
+    depends_on:
+      - mariadb
+      - pdns-master
+
+  pdns-admin-uwsgi:
+    image: pschiffe/pdns-admin-uwsgi
+    networks:
+      pdns:
+        aliases:
+          - pdns-admin-uwsgi
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - PDNS_ADMIN_SQLA_DB_PASSWORD='${MYSQL_ROOT_PASSWORD}'
+      - PDNS_VERSION=4.5
+      - PDNS_API_KEY=${PDNS_API_KEY}
+      - PDNS_ADMIN_SALT='${PDNS_ADMIN_SALT}'
+    depends_on:
+      - mariadb
+      - pdns-master
+
+  pdns-admin-static:
+    image: pschiffe/pdns-admin-static
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.pdns-admin-static.rule=Host(`${ADMINWEBSSERVER}.${DOMAIN}`)"
+      - "traefik.http.routers.pdns-admin-static.middlewares=pdns-admin-static"
+      - "traefik.http.routers.pdns-admin-static.entrypoints=websecure"
+      - "traefik.http.routers.pdns-admin-static.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.pdns-admin-static.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
+      - "traefik.http.middlewares.pdns-admin-static.headers.customresponseheaders.Access-Control-Allow-Origin=*"
+      - "traefik.http.middlewares.pdns-admin-static.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
+
+    networks:
+      - pdns
+      - proxy
+#    ports:
+#      - '8989:80'
+    expose: 
+      - 80
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    depends_on:
+      - pdns-admin-uwsgi
+      
+networks:
+  pdns:
+    ipam:
+      config:
+        - subnet: 172.6.0.0/16
+          gateway: 172.6.0.1
+  proxy:
+    external: true
+    name: proxy
+volumes:
+  mariadb:
