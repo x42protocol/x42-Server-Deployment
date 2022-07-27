@@ -27,7 +27,10 @@ services:
     command: --chain=x42
     restart: always
     depends_on:
-      - "x42postgres"
+      x42postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
     volumes:
       - type: bind
         source: ./xserver
@@ -83,6 +86,11 @@ services:
         - POSTGRES_USER=${POSTGRES_USER}
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
         - POSTGRES_DB=${POSTGRES_DB}
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
       logging:
         options:
           max-size: 10m
@@ -93,6 +101,39 @@ services:
         - /var/x42/postgres-data:/var/lib/postgresql/data
       networks:
         - x42network
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/
+    networks:
+      - x42network
+
+  mongo:
+    container_name: xDocumentStore
+    image: mongo:5.0.9
+    mem_limit: 512m
+    cpus: 0.200
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+    stop_grace_period: 5m
+    volumes:
+      - /var/x42/mongo-db:/data/db
+      - /var/x42/mongo-configdb:/data/configdb
+    networks:
+      - x42network
      
   x42serverui:
     image: x42protocoldocker/x42serverui:latest
