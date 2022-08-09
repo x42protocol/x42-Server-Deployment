@@ -46,6 +46,22 @@ services:
     expose:
       - 4242
 
+  x42serverworker:
+    image: dimsavva/xserverworker:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+    restart: always
+    depends_on:
+      mongo:
+        condition: service_healthy
+      x42core:
+        condition: service_started
+    networks:
+      - x42network
+
   x42core:
     image: x42protocoldocker/x42core:latest
     labels:
