@@ -7,6 +7,6 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ADD x42.Server-linux-x64.tar.gz . 
+ADD x42.Node-1.1.29-linux-x64.tar.gz . 
 
 ENTRYPOINT ["dotnet", "x42.xServerD.dll"]
