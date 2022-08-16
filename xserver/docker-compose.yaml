@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   x42server:
-    image: x42protocoldocker/x42server:latest
+    image: x42protocoldocker/x42server:3.0.0.14
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
