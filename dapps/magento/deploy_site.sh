@@ -19,6 +19,7 @@ main(){
 	mkdir -p sites/${DOMAIN}
 	sed -e 's/#DOMAIN#/'${DOMAIN}'/g' -e 's/#domain#/'${DOMAIN_LOWER}'/g' docker-compose.yml > sites/${DOMAIN}/docker-compose.yml
 	cp -r bin sites/${DOMAIN}/
+	chmod -R +x sites/${DOMAIN}/bin
 	cd sites/${DOMAIN}
 	mkdir acme
 	mkdir data
