@@ -1,7 +1,7 @@
 version: '3'
 services:
   mysql:
-    image: mariadb:10.5.9
+    image: mariadb:10.3.17
     command: --max_allowed_packet=256M --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
       - "./data/db:/var/lib/mysql"
@@ -33,11 +33,13 @@ services:
       - "traefik.http.routers.#domain#.tls.certresolver=myresolver"
     volumes:
         - ./lsws/conf:/usr/local/lsws/conf
-        - ./lsws/admin-conf:/usr/local/lsws/admin/conf
+        - ./lsws/admin/conf:/usr/local/lsws/admin/conf
         - ./bin/container:/usr/local/bin
         - ./sites:/var/www/vhosts/
         - ./acme:/root/.acme.sh/
         - ./logs:/usr/local/lsws/logs/
+    ports:
+      - 7080:7080
     restart: always
     networks:
       proxy:
@@ -61,6 +63,10 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
     restart: always  
+    networks:
+      #domain#:
+        aliases:
+          - #domain#
 volumes:
   esdata:
 
