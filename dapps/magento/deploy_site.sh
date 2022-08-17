@@ -8,16 +8,18 @@ fi
 
 APP_NAME=$1
 DOMAIN=$2
-DOMAIN_LOWER=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]' | sed 's/\./'_'/g')
+DOMAIN_LOWER=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]' )
+DOMAIN_LOWER_USCORE=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]' | sed 's/\./'_'/g')
+DOMAIN_STRIPPEDLOWER=$(echo "$DOMAIN_LOWER_USCORE" | sed 's/_//g')
 EMAIL=$3
 MYSQL_PASSWORD=$4
 MYSQL_ROOT_PASSWORD=$5
 
 main(){
-	echo "Setting Up ${DOMAIN_LOWER}"
+	echo "Setting Up ${DOMAIN_LOWER_USCORE}"
 	echo Setting up Envrionment
 	mkdir -p sites/${DOMAIN}
-	sed -e 's/#DOMAIN#/'${DOMAIN}'/g' -e 's/#domain#/'${DOMAIN_LOWER}'/g' docker-compose.yml > sites/${DOMAIN}/docker-compose.yml
+	sed -e 's/#DOMAIN#/'${DOMAIN}'/g' -e 's/#domain#/'${DOMAIN_LOWER_USCORE}'/g' docker-compose.yml > sites/${DOMAIN}/docker-compose.yml
 	cp -r bin sites/${DOMAIN}/
 	chmod -R +x sites/${DOMAIN}/bin
 	chmod +x deploy_site.sh
@@ -50,9 +52,10 @@ EOF
 	echo "Installing ${APP_NAME} on ${DOMAIN}"
 	bash ./bin/appinstall.sh -A ${APP_NAME} -D ${DOMAIN}
 	
-#	echo "Issuing Certificate on ${DOMAIN}"
-#	source ./bin/acme.sh -I -E ${EMAIL} -D ${DOMAIN}
-	
+	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 php /var/www/vhosts/${DOMAIN_LOWER}/html/bin/magento config:set web/secure/use_in_adminhtml 1
+	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 rm -rf /var/www/vhosts/${DOMAIN_LOWER}/html/var/cache
+	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 php /var/www/vhosts/${DOMAIN_LOWER}/html/bin/magento config:set web/cookie/cookie_domain ${DOMAIN_LOWER}
+
 	echo "Done."
 }
 
