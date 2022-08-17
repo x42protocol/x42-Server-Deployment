@@ -53,7 +53,6 @@ EOF
 	bash ./bin/appinstall.sh -A ${APP_NAME} -D ${DOMAIN}
 	
 	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 php /var/www/vhosts/${DOMAIN_LOWER}/html/bin/magento config:set web/secure/use_in_adminhtml 1
-	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 rm -rf /var/www/vhosts/${DOMAIN_LOWER}/html/var/cache
 	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 php /var/www/vhosts/${DOMAIN_LOWER}/html/bin/magento config:set web/cookie/cookie_domain ${DOMAIN_LOWER}
 
 	echo "Done."
