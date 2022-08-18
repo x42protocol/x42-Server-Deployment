@@ -28,6 +28,7 @@ main(){
 	mkdir logs
 	mkdir lsws
 	mkdir sites
+	chmod 755 lsws
 
 cat <<EOF > .env
 TimeZone=America/New_York
