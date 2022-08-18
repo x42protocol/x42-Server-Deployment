@@ -52,7 +52,7 @@ EOF
 	echo "Installing ${APP_NAME} on ${DOMAIN}"
 	bash ./bin/appinstall.sh -A ${APP_NAME} -D ${DOMAIN} 
 	
-	docker exec -it ${DOMAIN_STRIPPEDLOWER}_mysql_1 php mysql -uroot -p${MYSQL_ROOT_PASSWORD}  <<< "use prestashopxservernetwork; update ps_configuration set value=1 where name like 'PS_SSL_ENABLED%';"
+	docker exec ${DOMAIN_STRIPPEDLOWER}_mysql_1 mysql -uroot -p${MYSQL_ROOT_PASSWORD}  <<< "use prestashopxservernetwork; update ps_configuration set value=1 where name like 'PS_SSL_ENABLED%';"
 	
 	echo "Done."
 }
