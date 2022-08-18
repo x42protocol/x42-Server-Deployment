@@ -53,7 +53,8 @@ EOF
 	
 	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 php /var/www/vhosts/${DOMAIN_LOWER}/html/bin/magento config:set web/secure/use_in_adminhtml 1
 	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 php /var/www/vhosts/${DOMAIN_LOWER}/html/bin/magento config:set web/cookie/cookie_domain ${DOMAIN_LOWER}
-
+	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 php /var/www/vhosts/${DOMAIN_LOWER}/html/bin/magento cron:install
+	docker exec -it ${DOMAIN_STRIPPEDLOWER}_litespeed_1 php /var/www/vhosts/${DOMAIN_LOWER}/html/bin/magento cron:run
 	echo "Done."
 }
 
