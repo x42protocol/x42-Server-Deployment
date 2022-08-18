@@ -31,13 +31,13 @@ main(){
 
 cat <<EOF > .env
 TimeZone=America/New_York
-LSWS_VERSION=5.4.12
-PHP_VERSION=lsphp74
-MYSQL_DATABASE=magento
+LSWS_VERSION=6.0.8
+PHP_VERSION=lsphp81
+MYSQL_DATABASE=prestashop
 MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-MYSQL_USER=magento
+MYSQL_USER=prestashop
 MYSQL_PASSWORD=${MYSQL_PASSWORD}
-DOMAIN=${DOMAIN}
+DOMAIN=localhost
 EOF
 
 	docker-compose up -d
