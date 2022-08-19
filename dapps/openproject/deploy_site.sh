@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -lt 5 ]; then
+if [ $# -lt 4 ]; then
   echo "Usage: $0 appname domain email my.db.password"
   echo "Usage: $0 openproject openproject.x42.site my@email.com mysecetwppass"
   exit 1
