@@ -25,7 +25,7 @@ services:
   web:
     image: openproject/community:12.2.1
     hostname: 
-    labels: #DOMAIN#
+    labels: #hostname#
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.#domain#.rule=Host(`#DOMAIN#`)"

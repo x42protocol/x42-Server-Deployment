@@ -11,6 +11,7 @@ DOMAIN=$2
 DOMAIN_LOWER=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]' )
 DOMAIN_LOWER_USCORE=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]' | sed 's/\./'_'/g')
 DOMAIN_STRIPPEDLOWER=$(echo "$DOMAIN_LOWER_USCORE" | sed 's/_//g')
+HOSTNAME=$DOMAIN
 EMAIL=$3
 DB_PASSWORD=$4
 
@@ -18,7 +19,7 @@ main(){
 	echo "Setting Up ${DOMAIN_LOWER_USCORE}"
 	echo Setting up Envrionment
 	mkdir -p sites/${DOMAIN}
-	sed -e 's/#DOMAIN#/'${DOMAIN}'/g' -e 's/#domain#/'${DOMAIN_LOWER_USCORE}'/g' docker-compose.yml > sites/${DOMAIN}/docker-compose.yml
+	sed -e 's/#hostname#/'${HOSTNAME}'/g'  -e 's/#DOMAIN#/'${DOMAIN}'/g' -e 's/#domain#/'${DOMAIN_LOWER_USCORE}'/g' docker-compose.yml > sites/${DOMAIN}/docker-compose.yml
 	cd sites/${DOMAIN}
 	mkdir pgdata
 	mkdir opdata
