@@ -24,6 +24,13 @@ services:
 
   web:
     image: openproject/community:12.2.1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.#domain#.rule=Host(`#DOMAIN#`)"
+      - "traefik.http.routers.#domain#.entrypoints=websecure"
+      - "traefik.http.services.#domain#.loadbalancer.server.port=8080"
+      - "traefik.http.routers.#domain#.tls.certresolver=myresolver"
     restart: unless-stopped
     command: "./docker/prod/web"
     environment:
@@ -37,14 +44,6 @@ services:
       OPENPROJECT_HTTPS: "false"
     volumes:
     - "./opdata:/var/openproject/assets"
-
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.#domain#.rule=Host(`#DOMAIN#`)"
-      - "traefik.http.routers.#domain#.entrypoints=websecure"
-      - "traefik.http.services.#domain#.loadbalancer.server.port=8080"
-      - "traefik.http.routers.#domain#.tls.certresolver=myresolver"
     networks:
       proxy:
         aliases:
