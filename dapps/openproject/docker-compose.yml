@@ -24,7 +24,8 @@ services:
 
   web:
     image: openproject/community:12.2.1
-    labels:
+    hostname: 
+    labels: #DOMAIN#
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.#domain#.rule=Host(`#DOMAIN#`)"
@@ -41,7 +42,7 @@ services:
       RAILS_MAX_THREADS: 16
       # set to true to enable the email receiving feature. See ./docker/cron for more options
       IMAP_ENABLED: "${IMAP_ENABLED:-false}"
-      OPENPROJECT_HTTPS: "false"
+      OPENPROJECT_HTTPS: "true"
     volumes:
     - "./opdata:/var/openproject/assets"
     networks:
@@ -74,7 +75,7 @@ services:
       RAILS_MAX_THREADS: 16
       # set to true to enable the email receiving feature. See ./docker/cron for more options
       IMAP_ENABLED: "${IMAP_ENABLED:-false}"
-      OPENPROJECT_HTTPS: "false"
+      OPENPROJECT_HTTPS: "true"
     volumes:
     - "./opdata:/var/openproject/assets"
     networks:
@@ -98,7 +99,7 @@ services:
       RAILS_MAX_THREADS: 16
       # set to true to enable the email receiving feature. See ./docker/cron for more options
       IMAP_ENABLED: "${IMAP_ENABLED:-false}"
-      OPENPROJECT_HTTPS: "false"
+      OPENPROJECT_HTTPS: "true"
     volumes:
     - "./opdata:/var/openproject/assets"
     networks:
@@ -122,7 +123,7 @@ services:
       RAILS_MAX_THREADS: 16
       # set to true to enable the email receiving feature. See ./docker/cron for more options
       IMAP_ENABLED: "${IMAP_ENABLED:-false}"
-      OPENPROJECT_HTTPS: "false"
+      OPENPROJECT_HTTPS: "true"
     volumes:
     - "./opdata:/var/openproject/assets"
     networks:
