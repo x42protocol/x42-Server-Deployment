@@ -7,36 +7,37 @@
       ansible.builtin.file:
         path: "../traefik/letsencrypt/acme.json"
         mode: '0600'
-        
-- name: Disable Systemd Resolved
-  hosts: localhost
-  become: true
-  handlers:
-  - name: Remove STUB
-    file:
-      path: /etc/resolv.conf
-      state: absent
-  - name: Restart NM
-    systemd:
-      name: NetworkManager
-      state: restarted
-  tasks:
-    - name: Set default as DNS operational mode
+
+    - name: Set DNSStubListener
       ini_file:
-        path: /etc/NetworkManager/NetworkManager.conf
-        section: main
-        option: dns
-        value: default
+        path: /etc/systemd/resolved.conf
+        section: Resolve
+        option: DNSStubListener
+        value: "no"
         no_extra_spaces: yes
-      notify:
-        - "Remove STUB"
-        - "Restart NM"
-    - name: Disable systemd-resolved
+
+    - name: Set DNS Servers
+      ini_file:
+        path: /etc/systemd/resolved.conf
+        section: Resolve
+        option: DNS
+        value: 1.1.1.1
+        no_extra_spaces: yes
+    
+    - name: Delete existing /etc/resolv.conf file or link
+      file: 
+        path: /etc/resolv.conf
+        state: absent
+    
+    - name: Creating a symlink
+      ansible.builtin.file:
+        src: /run/systemd/resolve/resolv.conf
+        dest: /etc/resolv.conf
+        state: link
+ 
+    - name: Restart systemd-resolved
       systemd:
         name: systemd-resolved
-        state: stopped
-        enabled: no
-        masked: yes
-      notify:
-        - "Remove STUB"
-        - "Restart NM"
+        state: restarted
+        enabled: yes
+        masked: no
