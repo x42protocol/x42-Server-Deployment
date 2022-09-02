@@ -39,11 +39,11 @@ services:
 
   pdns-master:
     image: pschiffe/pdns-mysql:${PDNS_MYSQL_TAG:-latest}
-    hostname: ${DNSMASTERHOST}.${DOMAIN}
+    hostname: ${DNSMASTERHOST}
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.pdns-master.rule=Host(`${DNSAPISSERVER}.${DOMAIN}`)"
+      - "traefik.http.routers.pdns-master.rule=Host(`${DNSAPISSERVER}`)"
       - "traefik.http.routers.pdns-master.middlewares=pdns-master"
       - "traefik.http.routers.pdns-master.entrypoints=websecure"
       - "traefik.http.services.pdns-master.loadbalancer.server.port=8081"
@@ -61,8 +61,8 @@ services:
         aliases:
           - proxy
     extra_hosts:
-      - '${DNSMASTERHOST}.${DOMAIN}:172.6.0.20'
-      - '${DNSSLAVEHOST}.${DOMAIN}:172.6.0.21'
+      - '${DNSMASTERHOST}:172.6.0.20'
+      - '${DNSSLAVEHOST}:172.6.0.21'
     ports:
       - '53:53/tcp'
       - '53:53/udp'
@@ -83,23 +83,23 @@ services:
       - PDNS_default_ttl=1500
       - PDNS_allow_axfr_ips=172.6.0.21
       - PDNS_only_notify=172.6.0.21
-      - PDNS_default_soa_content=${DNSMASTERHOST}.${DOMAIN}. hostmaster.${DOMAIN}. 2022031303 10800 3600 604800 3600
+      - PDNS_default_soa_content=${DNSMASTERHOST}. hostmaster.${DOMAIN}. 2022031303 10800 3600 604800 3600
     depends_on:
       - mariadb
 
   pdns-slave:
     image: pschiffe/pdns-mysql:${PDNS_MYSQL_TAG:-latest}
-    hostname: ${DNSSLAVEHOST}.${DOMAIN}
+    hostname: ${DNSSLAVEHOST}
 #    labels:
 #      - "traefik.enable=true"
 #      - "traefik.docker.network=proxy"
 #
-#      - "traefik.http.routers.pdns-slave-https.rule=Host(`${DNSSLAVEHOST}.${DOMAIN}`)"
+#      - "traefik.http.routers.pdns-slave-https.rule=Host(`${DNSSLAVEHOST}`)"
 #      - "traefik.http.routers.pdns-slave-https.middlewares=pdns-slave-https"
 #      - "traefik.http.routers.pdns-slave-https.entrypoints=websecure"
 #      - "traefik.http.routers.pdns-slave-https.tls.certresolver=myresolver"
 #      
-#      - "traefik.tcp.routers.pdns-slave-dns.rule=HostSNI(`${DNSSLAVEHOST}.${DOMAIN}`)"
+#      - "traefik.tcp.routers.pdns-slave-dns.rule=HostSNI(`${DNSSLAVEHOST}`)"
 #      - "traefik.tcp.routers.pdns-slave-dns.entrypoints=dns"
 #
 #      - "traefik.http.middlewares.pdns-slave-https.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
@@ -113,8 +113,8 @@ services:
         aliases:
           - proxy
     extra_hosts:
-      - '${DNSMASTERHOST}.${DOMAIN}:172.6.0.20'
-      - '${DNSSLAVEHOST}.${DOMAIN}:172.6.0.21'
+      - '${DNSMASTERHOST}:172.6.0.20'
+      - '${DNSSLAVEHOST}:172.6.0.21'
     ports:
       - '8082:8081'
 #    expose: 
@@ -134,7 +134,7 @@ services:
       - PDNS_disable_axfr=yes
       - PDNS_allow_notify_from=172.6.0.20
       - SUPERMASTER_IPS=172.6.0.20
-      - PDNS_default_soa_content=${DNSMASTERHOST}.${DOMAIN}. hostmaster.${DOMAIN}. 2022031303 10800 3600 604800 3600
+      - PDNS_default_soa_content=${DNSMASTERHOST}. hostmaster.${DOMAIN}. 2022031303 10800 3600 604800 3600
     depends_on:
       - mariadb
       - pdns-master
@@ -161,7 +161,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.pdns-admin-static.rule=Host(`${ADMINWEBSSERVER}.${DOMAIN}`)"
+      - "traefik.http.routers.pdns-admin-static.rule=Host(`${ADMINWEBSSERVER}`)"
       - "traefik.http.routers.pdns-admin-static.middlewares=pdns-admin-static"
       - "traefik.http.routers.pdns-admin-static.entrypoints=websecure"
       - "traefik.http.routers.pdns-admin-static.tls.certresolver=myresolver"
