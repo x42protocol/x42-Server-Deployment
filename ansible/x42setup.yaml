@@ -7,3 +7,36 @@
       ansible.builtin.file:
         path: "../traefik/letsencrypt/acme.json"
         mode: '0600'
+        
+- name: Disable Systemd Resolved
+  hosts: localhost
+  become: true
+  handlers:
+  - name: Remove STUB
+    file:
+      path: /etc/resolv.conf
+      state: absent
+  - name: Restart NM
+    systemd:
+      name: NetworkManager
+      state: restarted
+  tasks:
+    - name: Set default as DNS operational mode
+      ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        section: main
+        option: dns
+        value: default
+        no_extra_spaces: yes
+      notify:
+        - "Remove STUB"
+        - "Restart NM"
+    - name: Disable systemd-resolved
+      systemd:
+        name: systemd-resolved
+        state: stopped
+        enabled: no
+        masked: yes
+      notify:
+        - "Remove STUB"
+        - "Restart NM"
