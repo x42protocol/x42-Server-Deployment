@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   x42server:
-    image: x42protocoldocker/x42server:3.0.0.14
+    image: x42protocoldocker/x42serverd:v4.0.7
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -45,6 +45,34 @@ services:
       - proxy
     expose:
       - 4242
+
+  x42serverui:
+    image: x42protocoldocker/x42serverui:v4.0.7
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.x42serverui.rule=Host(`${XSERVER_FRONTEND}`)"
+      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
+      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Origin=*"
+      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
+      - "traefik.http.routers.x42serverui.middlewares=x42serverui"
+      - "traefik.http.routers.x42serverui.entrypoints=websecure"
+      - "traefik.http.routers.x42serverui.tls.certresolver=myresolver"
+      - "traefik.http.routers.x42serverui.tls.options=private@file" 
+    restart: always
+    depends_on:
+      - "x42core"
+      - "x42server"
+    volumes:
+      - type: bind
+        source: ./xserverui/app.config.json
+        target: /usr/share/nginx/html/assets/app.config.json
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - x42network
+      - proxy
+    expose:
+      - 80
 
   x42serverworker:
     image: dimsavva/xserverworker:latest
@@ -117,6 +145,7 @@ services:
         - /var/x42/postgres-data:/var/lib/postgresql/data
       networks:
         - x42network
+
 #  mongo-express:
 #    image: mongo-express
 #    restart: always
@@ -151,33 +180,7 @@ services:
     networks:
       - x42network
      
-  x42serverui:
-    image: x42protocoldocker/x42serverui:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.x42serverui.rule=Host(`${XSERVER_FRONTEND}`)"
-      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
-      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Origin=*"
-      - "traefik.http.middlewares.x42serverui.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
-      - "traefik.http.routers.x42serverui.middlewares=x42serverui"
-      - "traefik.http.routers.x42serverui.entrypoints=websecure"
-      - "traefik.http.routers.x42serverui.tls.certresolver=myresolver"
-      - "traefik.http.routers.x42serverui.tls.options=private@file" 
-    restart: always
-    depends_on:
-      - "x42core"
-      - "x42server"
-    volumes:
-      - type: bind
-        source: ./xserverui/app.config.json
-        target: /usr/share/nginx/html/assets/app.config.json
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    networks:
-      - x42network
-      - proxy
-    expose:
-      - 80
+
 networks:
   x42network:
     external: false
