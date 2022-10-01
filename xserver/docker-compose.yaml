@@ -24,6 +24,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+
+      - MONGOCONNECTIONSTRING=${MONGOCONNECTIONSTRING}
     command: --chain=x42
     restart: always
     depends_on:
@@ -79,8 +80,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGOCONNECTIONSTRING=${MONGOCONNECTIONSTRING}
     restart: always
     depends_on:
       mongo:
