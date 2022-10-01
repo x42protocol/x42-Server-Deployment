@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   x42server:
-    image: x42protocoldocker/x42serverd:v4.0.7
+    image: x42protocoldocker/x42serverd:v4.0.8
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -47,7 +47,7 @@ services:
       - 4242
 
   x42serverui:
-    image: x42protocoldocker/x42serverui:v4.0.7
+    image: x42protocoldocker/x42serverui:v4.0.8
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -75,7 +75,7 @@ services:
       - 80
 
   x42serverworker:
-    image: dimsavva/xserverworker:latest
+    image: x42protocoldocker/xserverworker:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+
