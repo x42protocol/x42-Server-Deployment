@@ -41,3 +41,10 @@
         state: restarted
         enabled: yes
         masked: no
+
+    - name: "Uninstall HTTPD/Apache"
+      tags: uninstall_apache
+      yum:
+        name: httpd
+        autoremove: yes
+        state: absent
