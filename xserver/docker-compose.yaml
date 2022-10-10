@@ -76,7 +76,7 @@ services:
       - 80
 
   x42serverworker:
-    image: x42protocoldocker/xserverworker:latest
+    image: x42protocoldocker/x42serverworker:v4.0.8
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+
@@ -91,7 +91,7 @@ services:
       - x42network
 
   x42core:
-    image: x42protocoldocker/x42core:latest
+    image: x42protocoldocker/x42blockcorenode:v1.1.43
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
