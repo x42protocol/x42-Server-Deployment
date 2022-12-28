@@ -1,14 +1,6 @@
 version: '2.4'
 
 services:
-
-  pdns-recursor:
-    image: pschiffe/pdns-recursor:${RECURSOR_TAG:-latest}
-    networks:
-      - pdns
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-
   mariadb:
     image: mariadb:10.6
     networks:
@@ -25,17 +17,6 @@ services:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       timeout: 10s
       retries: 5
-
-#  phpmyadmin:
-#    image: phpmyadmin/phpmyadmin:5
-#    networks:
-#      - pdns
-#      - proxy
-#    ports:
-#      - '8988:80'
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   pdns-master:
     image: pschiffe/pdns-mysql:${PDNS_MYSQL_TAG:-latest}
@@ -62,7 +43,6 @@ services:
           - proxy
     extra_hosts:
       - '${DNSMASTERHOST}:172.6.0.20'
-      - '${DNSSLAVEHOST}:172.6.0.21'
     ports:
       - '53:53/tcp'
       - '53:53/udp'
@@ -81,63 +61,9 @@ services:
       - PDNS_webserver_allow_from=172.6.0.0/16,164.215.30.204/32, 197.245.78.110/32, 172.20.0.0/16
       - PDNS_version_string=anonymous
       - PDNS_default_ttl=1500
-      - PDNS_allow_axfr_ips=172.6.0.21
-      - PDNS_only_notify=172.6.0.21
       - PDNS_default_soa_content=${DNSMASTERHOST}. hostmaster.${DOMAIN}. 2022031303 10800 3600 604800 3600
     depends_on:
       - mariadb
-
-  pdns-slave:
-    image: pschiffe/pdns-mysql:${PDNS_MYSQL_TAG:-latest}
-    hostname: ${DNSSLAVEHOST}
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.docker.network=proxy"
-#
-#      - "traefik.http.routers.pdns-slave-https.rule=Host(`${DNSSLAVEHOST}`)"
-#      - "traefik.http.routers.pdns-slave-https.middlewares=pdns-slave-https"
-#      - "traefik.http.routers.pdns-slave-https.entrypoints=websecure"
-#      - "traefik.http.routers.pdns-slave-https.tls.certresolver=myresolver"
-#      
-#      - "traefik.tcp.routers.pdns-slave-dns.rule=HostSNI(`${DNSSLAVEHOST}`)"
-#      - "traefik.tcp.routers.pdns-slave-dns.entrypoints=dns"
-#
-#      - "traefik.http.middlewares.pdns-slave-https.headers.customresponseheaders.Access-Control-Allow-Methods=POST, GET, PUT, OPTIONS, DELETE"
-#      - "traefik.http.middlewares.pdns-slave-https.headers.customresponseheaders.Access-Control-Allow-Origin=*"
-#      - "traefik.http.middlewares.pdns-slave-https.headers.customresponseheaders.Access-Control-Allow-Headers=x-requested-with, Content-Type,Authorization"
-
-    networks:
-      pdns:
-        ipv4_address: 172.6.0.21
-      proxy:
-        aliases:
-          - proxy
-    extra_hosts:
-      - '${DNSMASTERHOST}:172.6.0.20'
-      - '${DNSSLAVEHOST}:172.6.0.21'
-    ports:
-      - '8082:8081'
-#    expose: 
-#      - 8081
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    environment:
-      - PDNS_gmysql_dbname=powerdnsslave
-      - PDNS_gmysql_password=${MYSQL_ROOT_PASSWORD}
-      - PDNS_slave=yes
-      - PDNS_superslave=yes
-      - PDNS_webserver=yes
-      - PDNS_webserver_address=0.0.0.0
-      - PDNS_webserver_allow_from=172.6.0.0/16
-      - PDNS_version_string=anonymous
-      - PDNS_disable_axfr=yes
-      - PDNS_allow_notify_from=172.6.0.20
-      - SUPERMASTER_IPS=172.6.0.20
-      - PDNS_default_soa_content=${DNSMASTERHOST}. hostmaster.${DOMAIN}. 2022031303 10800 3600 604800 3600
-    depends_on:
-      - mariadb
-      - pdns-master
 
   pdns-admin-uwsgi:
     image: pschiffe/pdns-admin-uwsgi
