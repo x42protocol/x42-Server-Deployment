@@ -86,7 +86,7 @@ services:
       mongo:
         condition: service_healthy
       x42core:
-        condition: service_started
+        condition: service_healthy
     networks:
       - x42network
 
@@ -106,6 +106,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+
+    healthcheck:
+      test: "curl -f localhost:42220/ping"
+      interval: 5s
+      timeout: 5s
+      retries: 20
     command: --chain=x42 -txindex=1 -addressindex=1
     restart: always
     ports:
